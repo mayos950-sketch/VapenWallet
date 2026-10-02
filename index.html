@@ -121,6 +121,12 @@ dialog::backdrop{background:#000c;backdrop-filter:blur(4px)}
 .profile-card{padding:17px;border:1px solid var(--line);border-radius:18px;background:#0d1b12;margin-bottom:12px}
 .profile-actions{display:grid;gap:9px}
 .profile-actions button{padding:14px;border-radius:14px;border:1px solid #ffffff12;background:#0d1a12;color:#fff;text-align:left;font-weight:750}
+.hidden-file{position:absolute!important;width:1px!important;height:1px!important;opacity:0!important;pointer-events:none!important}
+.mini-list{display:grid;gap:8px;margin-top:14px}
+.mini-item{padding:12px 13px;border-radius:14px;border:1px solid #ffffff12;background:#0d1a12}
+.mini-item b{display:block;margin-bottom:4px}
+.mini-item button{margin-top:8px;padding:7px 10px;border-radius:10px;border:1px solid #ffffff14;background:#101f17;color:#fff}
+.note-line{font-size:.78rem;color:var(--muted)}
 </style>
 </head>
 <body>
@@ -147,9 +153,9 @@ dialog::backdrop{background:#000c;backdrop-filter:blur(4px)}
   <div class="section-head"><h2>Jaktoversikt</h2><span class="small">Lokalt på telefonen</span></div>
   <div class="grid">
     <button class="tile gold" id="tileWeapons"><div class="photo">🦌</div><div class="label">Mine våpen<div class="sub" id="weaponCount">0 våpen</div></div></button>
-    <button class="tile" id="tileDocs"><div class="photo">📁</div><div class="label">Dokumenter<div class="sub">Egne notater og filer</div></div></button>
-    <button class="tile" id="tileGear"><div class="photo">🎒</div><div class="label">Jaktutstyr<div class="sub">Personlig oversikt</div></div></button>
-    <button class="tile" id="tileAreas"><div class="photo">📍</div><div class="label">Jaktområder<div class="sub">Notater og steder</div></div></button>
+    <button class="tile" id="tileDocs"><div class="photo">📁</div><div class="label">Dokumenter<div class="sub" id="docsCount">Egne notater og filer</div></div></button>
+    <button class="tile" id="tileGear"><div class="photo">🎒</div><div class="label">Jaktutstyr<div class="sub" id="gearCount">Personlig oversikt</div></div></button>
+    <button class="tile" id="tileAreas"><div class="photo">📍</div><div class="label">Jaktområder<div class="sub" id="areasCount">Notater og steder</div></div></button>
   </div>
 
   <div class="section-head" style="margin-top:22px"><h2>Mine våpen</h2><span class="small" id="countText"></span></div>
@@ -186,7 +192,12 @@ dialog::backdrop{background:#000c;backdrop-filter:blur(4px)}
 <div class="modal">
   <div class="modal-head"><h2 id="dialogTitle">Legg til våpen</h2><button class="close" id="closeDialog">×</button></div>
   <input id="editId" type="hidden">
-  <div class="field"><label>Bilde</label><input id="photoInput" type="file" accept="image/*" capture="environment"></div>
+  <div class="field">
+    <label>Bilde</label>
+    <input id="photoInput" class="hidden-file" type="file" accept="image/*" capture="environment">
+    <button id="photoBtn" type="button" class="secondary-btn">Ta bilde / velg bilde</button>
+    <div id="photoName" class="small" style="margin-top:8px">Ingen bilde valgt</div>
+  </div>
   <div class="row">
     <div class="field"><label>Produsent</label><input id="makeInput" placeholder="Tikka"></div>
     <div class="field"><label>Modell</label><input id="modelInput" placeholder="T3x Lite"></div>
@@ -203,14 +214,56 @@ dialog::backdrop{background:#000c;backdrop-filter:blur(4px)}
 </div>
 </dialog>
 
+
+<dialog id="docsDialog">
+<div class="modal">
+  <div class="modal-head"><h2>Dokumenter</h2><button class="close" id="closeDocsDialog">×</button></div>
+  <div class="field"><label>Tittel</label><input id="docTitleInput" placeholder="f.eks. Ammunisjonsnotat"></div>
+  <div class="field"><label>Notat</label><textarea id="docTextInput" rows="3" placeholder="Skriv et notat"></textarea></div>
+  <button id="saveDocBtn" class="primary-btn">Lagre dokument</button>
+  <div id="docsList" class="mini-list"></div>
+</div>
+</dialog>
+
+<dialog id="gearDialog">
+<div class="modal">
+  <div class="modal-head"><h2>Jaktutstyr</h2><button class="close" id="closeGearDialog">×</button></div>
+  <div class="field"><label>Utstyr</label><input id="gearNameInput" placeholder="f.eks. Ryggsekk"></div>
+  <div class="field"><label>Notat</label><textarea id="gearTextInput" rows="3" placeholder="Skriv et notat"></textarea></div>
+  <button id="saveGearBtn" class="primary-btn">Lagre utstyr</button>
+  <div id="gearList" class="mini-list"></div>
+</div>
+</dialog>
+
+<dialog id="areasDialog">
+<div class="modal">
+  <div class="modal-head"><h2>Jaktområder</h2><button class="close" id="closeAreasDialog">×</button></div>
+  <div class="field"><label>Område</label><input id="areaNameInput" placeholder="f.eks. Nordmarka"></div>
+  <div class="field"><label>Notat</label><textarea id="areaTextInput" rows="3" placeholder="Skriv et notat"></textarea></div>
+  <button id="saveAreaBtn" class="primary-btn">Lagre område</button>
+  <div id="areasList" class="mini-list"></div>
+</div>
+</dialog>
+
 <script>
-const KEY='vapenwallet-jeger-v2';
+const KEY='vapenwallet-jeger-v3';
+const DOCS_KEY='vapenwallet-jeger-docs-v1';
+const GEAR_KEY='vapenwallet-jeger-gear-v1';
+const AREAS_KEY='vapenwallet-jeger-areas-v1';
 let weapons=JSON.parse(localStorage.getItem(KEY)||'[]');
+let docs=JSON.parse(localStorage.getItem(DOCS_KEY)||'[]');
+let gear=JSON.parse(localStorage.getItem(GEAR_KEY)||'[]');
+let areas=JSON.parse(localStorage.getItem(AREAS_KEY)||'[]');
 let filter='all', photoData='';
 
 const $=id=>document.getElementById(id);
 const esc=s=>String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
-function persist(){localStorage.setItem(KEY,JSON.stringify(weapons))}
+function persist(){
+ localStorage.setItem(KEY,JSON.stringify(weapons));
+ localStorage.setItem(DOCS_KEY,JSON.stringify(docs));
+ localStorage.setItem(GEAR_KEY,JSON.stringify(gear));
+ localStorage.setItem(AREAS_KEY,JSON.stringify(areas));
+}
 function openOfficial(){window.open('https://www.politiet.no/tjenester/vapen/vapenkort/','_blank','noopener')}
 
 function shown(){
@@ -242,11 +295,15 @@ function render(){
  </article>`).join(''):'<div class="profile-card"><b>Ingen våpen lagt til ennå.</b><p class="small">Trykk på + for å legge til det første.</p></div>';
  document.querySelectorAll('[data-edit]').forEach(b=>b.onclick=()=>openEdit(b.dataset.edit));
  document.querySelectorAll('[data-fav]').forEach(b=>b.onclick=()=>{const w=weapons.find(x=>x.id===b.dataset.fav);if(w){w.favorite=!w.favorite;persist();render()}});
+ $('docsCount').textContent = docs.length ? `${docs.length} lagret` : 'Egne notater og filer';
+ $('gearCount').textContent = gear.length ? `${gear.length} lagret` : 'Personlig oversikt';
+ $('areasCount').textContent = areas.length ? `${areas.length} lagret` : 'Notater og steder';
+ renderMiniLists();
 }
 function resetForm(){
  $('editId').value='';$('dialogTitle').textContent='Legg til våpen';
  ['makeInput','modelInput','caliberInput','serialInput','dateInput','notesInput'].forEach(id=>$(id).value='');
- $('typeInput').value='Rifle';$('photoInput').value='';photoData='';$('deleteBtn').classList.add('hidden');
+ $('typeInput').value='Rifle';$('photoInput').value='';$('photoName').textContent='Ingen bilde valgt';photoData='';$('deleteBtn').classList.add('hidden');
 }
 function openAdd(){resetForm();$('weaponDialog').showModal()}
 function openEdit(id){
@@ -254,10 +311,14 @@ function openEdit(id){
  $('editId').value=id;$('dialogTitle').textContent='Rediger våpen';
  $('makeInput').value=w.make||'';$('modelInput').value=w.model||'';$('caliberInput').value=w.caliber||'';
  $('typeInput').value=w.type||'Rifle';$('serialInput').value=w.serial||'';$('dateInput').value=w.date||'';
- $('notesInput').value=w.notes||'';photoData=w.photo||'';$('deleteBtn').classList.remove('hidden');$('weaponDialog').showModal();
+ $('notesInput').value=w.notes||'';photoData=w.photo||'';$('photoName').textContent=w.photo?'Bilde valgt':'Ingen bilde valgt';$('deleteBtn').classList.remove('hidden');$('weaponDialog').showModal();
 }
+$('photoBtn').onclick=()=>$('photoInput').click();
 $('photoInput').onchange=e=>{
- const f=e.target.files?.[0];if(!f)return;const r=new FileReader();r.onload=()=>photoData=r.result;r.readAsDataURL(f);
+ const f=e.target.files?.[0];
+ if(!f){$('photoName').textContent='Ingen bilde valgt';return;}
+ $('photoName').textContent=f.name || 'Bilde valgt';
+ const r=new FileReader();r.onload=()=>photoData=r.result;r.readAsDataURL(f);
 };
 $('saveBtn').onclick=()=>{
  const id=$('editId').value||crypto.randomUUID(), old=weapons.find(x=>x.id===id);
@@ -265,7 +326,7 @@ $('saveBtn').onclick=()=>{
  caliber:$('caliberInput').value.trim(),type:$('typeInput').value,serial:$('serialInput').value.trim(),
  date:$('dateInput').value,notes:$('notesInput').value.trim(),photo:photoData,favorite:old?.favorite||false};
  if(old)Object.assign(old,obj);else weapons.unshift(obj);
- persist();$('weaponDialog').close();render();
+ persist();$('weaponDialog').close();$('photoName').textContent='Ingen bilde valgt';render();
 };
 $('deleteBtn').onclick=()=>{
  const id=$('editId').value;if(id&&confirm('Slette dette våpenet fra VåpenWallet?')){
@@ -281,7 +342,9 @@ function showHome(){ $('homeView').classList.remove('hidden');$('profileView').c
 function showProfile(){ $('homeView').classList.add('hidden');$('profileView').classList.remove('hidden'); }
 $('backHome').onclick=showHome;
 $('tileWeapons').onclick=()=>{filter='all';render();document.querySelector('.section-head:nth-of-type(2)')?.scrollIntoView({behavior:'smooth'})};
-['tileDocs','tileGear','tileAreas'].forEach(id=>$(id).onclick=()=>alert('Kommer i neste versjon.'));
+$('tileDocs').onclick=()=>$('docsDialog').showModal();
+$('tileGear').onclick=()=>$('gearDialog').showModal();
+$('tileAreas').onclick=()=>$('areasDialog').showModal();
 document.querySelectorAll('.nav').forEach(b=>b.onclick=()=>{
  document.querySelectorAll('.nav').forEach(n=>n.classList.remove('active'));b.classList.add('active');
  const n=b.dataset.nav;
@@ -289,15 +352,56 @@ document.querySelectorAll('.nav').forEach(b=>b.onclick=()=>{
  else{showHome();filter=n==='fav'?'fav':'all';render();}
 });
 $('exportBtn').onclick=()=>{
- const blob=new Blob([JSON.stringify(weapons,null,2)],{type:'application/json'});
+ const payload={weapons,docs,gear,areas};
+ const blob=new Blob([JSON.stringify(payload,null,2)],{type:'application/json'});
  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='vapenwallet-jeger-backup.json';a.click();URL.revokeObjectURL(a.href);
 };
 $('importBtn').onclick=()=>$('importFile').click();
 $('importFile').onchange=async e=>{
  const f=e.target.files?.[0];if(!f)return;
- try{const d=JSON.parse(await f.text());if(Array.isArray(d)){weapons=d;persist();render();alert('Backup lastet inn.')}}catch{alert('Kunne ikke lese filen.')}
+ try{
+   const d=JSON.parse(await f.text());
+   if(Array.isArray(d)){ weapons=d; docs=[]; gear=[]; areas=[]; }
+   else{
+     weapons=Array.isArray(d.weapons)?d.weapons:[];
+     docs=Array.isArray(d.docs)?d.docs:[];
+     gear=Array.isArray(d.gear)?d.gear:[];
+     areas=Array.isArray(d.areas)?d.areas:[];
+   }
+   persist();render();alert('Backup lastet inn.');
+ }catch{alert('Kunne ikke lese filen.')}
 };
-$('clearBtn').onclick=()=>{if(confirm('Slette alle lokale data?')){weapons=[];persist();render();}};
+$('clearBtn').onclick=()=>{if(confirm('Slette alle lokale data?')){weapons=[];docs=[];gear=[];areas=[];persist();render();}};
+function renderMiniLists(){
+ $('docsList').innerHTML = docs.length ? docs.map((x,i)=>`<div class="mini-item"><b>${esc(x.title||'Dokument')}</b><div class="note-line">${esc(x.text||'')}</div><button data-del-doc="${i}">Slett</button></div>`).join('') : '<div class="note-line">Ingen dokumenter lagret ennå.</div>';
+ $('gearList').innerHTML = gear.length ? gear.map((x,i)=>`<div class="mini-item"><b>${esc(x.name||'Utstyr')}</b><div class="note-line">${esc(x.text||'')}</div><button data-del-gear="${i}">Slett</button></div>`).join('') : '<div class="note-line">Ingen utstyr lagret ennå.</div>';
+ $('areasList').innerHTML = areas.length ? areas.map((x,i)=>`<div class="mini-item"><b>${esc(x.name||'Område')}</b><div class="note-line">${esc(x.text||'')}</div><button data-del-area="${i}">Slett</button></div>`).join('') : '<div class="note-line">Ingen områder lagret ennå.</div>';
+
+ document.querySelectorAll('[data-del-doc]').forEach(b=>b.onclick=()=>{docs.splice(Number(b.dataset.delDoc),1);persist();render();});
+ document.querySelectorAll('[data-del-gear]').forEach(b=>b.onclick=()=>{gear.splice(Number(b.dataset.delGear),1);persist();render();});
+ document.querySelectorAll('[data-del-area]').forEach(b=>b.onclick=()=>{areas.splice(Number(b.dataset.delArea),1);persist();render();});
+}
+
+$('closeDocsDialog').onclick=()=>$('docsDialog').close();
+$('closeGearDialog').onclick=()=>$('gearDialog').close();
+$('closeAreasDialog').onclick=()=>$('areasDialog').close();
+
+$('saveDocBtn').onclick=()=>{
+ const title=$('docTitleInput').value.trim(), text=$('docTextInput').value.trim();
+ if(!title && !text) return;
+ docs.unshift({title,text}); $('docTitleInput').value=''; $('docTextInput').value=''; persist(); render();
+};
+$('saveGearBtn').onclick=()=>{
+ const name=$('gearNameInput').value.trim(), text=$('gearTextInput').value.trim();
+ if(!name && !text) return;
+ gear.unshift({name,text}); $('gearNameInput').value=''; $('gearTextInput').value=''; persist(); render();
+};
+$('saveAreaBtn').onclick=()=>{
+ const name=$('areaNameInput').value.trim(), text=$('areaTextInput').value.trim();
+ if(!name && !text) return;
+ areas.unshift({name,text}); $('areaNameInput').value=''; $('areaTextInput').value=''; persist(); render();
+};
+
 render();
 </script>
 </body>
