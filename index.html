@@ -1,0 +1,359 @@
+<!doctype html>
+<html lang="no">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#06140f">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" sizes="180x180" href="icon-180.png">
+<link rel="icon" type="image/png" sizes="64x64" href="favicon-64.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="VåpenWallet">
+
+<title>VåpenWallet</title>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="VåpenWallet">
+<style>
+*{box-sizing:border-box}
+:root{
+  --bg:#06120e;--panel:#0d2118;--panel2:#10291e;--text:#f4f8f5;--muted:#9fb3a8;
+  --green:#42d276;--green2:#1f8d4d;--line:rgba(96,213,137,.22);--danger:#e65f5f;
+}
+html,body{margin:0;min-height:100%;background:#04100c;color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+body{padding-bottom:88px}
+button,input,select,textarea{font:inherit}
+button{cursor:pointer}
+.app{max-width:620px;margin:auto;min-height:100vh;background:
+  radial-gradient(circle at 50% -10%,rgba(74,180,112,.20),transparent 28%),
+  linear-gradient(180deg,#0b1e17,#06110d 58%,#040b08);
+}
+.hero{
+  padding:calc(22px + env(safe-area-inset-top)) 18px 20px;
+  background:
+    linear-gradient(180deg,rgba(2,13,9,.12),rgba(2,13,9,.86)),
+    radial-gradient(circle at 70% 0%,rgba(90,180,120,.25),transparent 30%),
+    linear-gradient(135deg,#173929,#0c241a 55%,#0b1712);
+  border-bottom:1px solid var(--line);
+}
+.brand{display:flex;align-items:center;gap:12px}
+.logo{
+  width:54px;height:54px;border-radius:16px;display:grid;place-items:center;
+  background:linear-gradient(145deg,#173a29,#0b1d15);border:1px solid #ffffff12;
+  box-shadow:0 10px 24px #0008;font-size:1.65rem
+}
+.brand h1{margin:0;font-size:1.9rem;letter-spacing:-.03em}
+.brand p{margin:3px 0 0;color:#c2d0c8;font-size:.92rem}
+.search{margin-top:18px;display:flex;gap:10px}
+.search input{
+  width:100%;padding:14px 16px;border-radius:16px;border:1px solid var(--line);
+  background:#0c1a15cc;color:#fff;outline:none
+}
+.quick{
+  display:grid;grid-template-columns:repeat(4,1fr);gap:9px;margin-top:14px
+}
+.quick button{
+  min-height:78px;border-radius:16px;border:1px solid #ffffff10;background:#10231b;
+  color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:7px;
+  font-weight:700;font-size:.76rem
+}
+.quick .qicon{font-size:1.35rem;color:var(--green)}
+.main{padding:18px}
+.section-title{display:flex;align-items:center;justify-content:space-between;margin:0 0 12px}
+.section-title h2{margin:0;font-size:1.45rem}
+.count{color:var(--muted);font-size:.9rem}
+.list{display:grid;gap:12px}
+.weapon{
+  background:linear-gradient(180deg,#10271d,#0c1d16);border:1px solid var(--line);
+  border-radius:18px;overflow:hidden;box-shadow:0 12px 28px #0005
+}
+.weapon-top{display:grid;grid-template-columns:122px 1fr;min-height:138px}
+.weapon-img{
+  background:
+    radial-gradient(circle at 50% 60%,rgba(102,214,141,.12),transparent 30%),
+    linear-gradient(145deg,#173527,#0c1913);
+  display:grid;place-items:center;font-size:2.8rem;position:relative;overflow:hidden
+}
+.weapon-img img{width:100%;height:100%;object-fit:cover}
+.star{
+  position:absolute;left:8px;top:8px;width:34px;height:34px;border:0;border-radius:50%;
+  background:#0b160fdd;color:#fff;font-size:1.1rem
+}
+.star.on{background:var(--green);color:#06200f}
+.weapon-info{padding:14px}
+.weapon-info h3{margin:0 0 5px;font-size:1.1rem}
+.meta{color:#c4d1ca;font-size:.88rem;line-height:1.55}
+.weapon-actions{display:flex;border-top:1px solid #ffffff0d}
+.weapon-actions button{
+  flex:1;border:0;background:#0b1812;color:#cfe0d6;padding:11px 8px;font-size:.82rem
+}
+.weapon-actions button+button{border-left:1px solid #ffffff0d}
+.empty{text-align:center;padding:40px 18px;color:var(--muted);border:1px dashed var(--line);border-radius:18px}
+
+.official{
+  margin:16px 18px 0;width:calc(100% - 36px);padding:15px 18px;border:0;border-radius:16px;
+  background:linear-gradient(180deg,#37c66d,#218c4c);color:#fff;font-weight:900;font-size:1rem;
+  box-shadow:0 12px 24px rgba(31,141,77,.25)
+}
+.note{margin:9px 22px 0;color:#90a49a;font-size:.78rem;line-height:1.45}
+
+.bottom{
+  position:fixed;left:0;right:0;bottom:0;z-index:40;height:78px;
+  padding:6px 8px calc(6px + env(safe-area-inset-bottom));
+  display:grid;grid-template-columns:repeat(5,1fr);
+  background:rgba(4,13,9,.95);border-top:1px solid #ffffff10;backdrop-filter:blur(18px)
+}
+.nav{border:0;background:transparent;color:#91a49a;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;font-size:.68rem;font-weight:700}
+.nav.active{color:var(--green)}
+.nav .ico{font-size:1.35rem}
+.nav.plus .ico{
+  width:48px;height:48px;border-radius:50%;display:grid;place-items:center;background:var(--green);
+  color:#082313;font-size:1.8rem;box-shadow:0 8px 18px rgba(66,210,118,.25)
+}
+
+dialog{width:min(94vw,520px);border:1px solid var(--line);border-radius:22px;background:#0b1812;color:#fff;padding:0}
+dialog::backdrop{background:#000b;backdrop-filter:blur(4px)}
+.modal{padding:20px}
+.modal-head{display:flex;justify-content:space-between;align-items:center}
+.modal-head h2{margin:0}
+.close{border:0;background:transparent;color:#fff;font-size:1.7rem}
+.field{margin-top:12px}
+.field label{display:block;color:#b7c6be;font-size:.82rem;margin-bottom:6px}
+.field input,.field textarea,.field select{
+  width:100%;padding:12px 13px;border-radius:12px;border:1px solid #294337;background:#0e2118;color:#fff
+}
+.row{display:flex;gap:10px}.row>*{flex:1}
+.primary{width:100%;margin-top:16px;padding:14px;border:0;border-radius:999px;background:var(--green);color:#082313;font-weight:900}
+.secondary{width:100%;margin-top:10px;padding:13px;border-radius:999px;border:1px solid #31513f;background:#10231a;color:#fff;font-weight:800}
+.danger{background:#341717;border-color:#6b3030;color:#ffdcdc}
+.file-hidden{position:absolute;width:1px;height:1px;opacity:0;pointer-events:none}
+.small{font-size:.82rem;color:var(--muted)}
+.profile-card{background:#0e2018;border:1px solid var(--line);border-radius:18px;padding:16px;margin-bottom:12px}
+.profile-actions{display:grid;gap:10px}
+.profile-actions button{padding:14px 15px;border-radius:14px;border:1px solid var(--line);background:#10231a;color:#fff;text-align:left;font-weight:700}
+.hidden{display:none!important}
+</style>
+</head>
+<body>
+<div class="app">
+  <section id="homeView">
+    <header class="hero">
+      <div class="brand">
+        <div class="logo">🦌</div>
+        <div><h1>VåpenWallet</h1><p>Mine våpen – enkelt og trygt</p></div>
+      </div>
+      <div class="search">
+        <input id="searchInput" type="search" placeholder="Søk i mine våpen …">
+      </div>
+      <div class="quick">
+        <button data-filter="all"><span class="qicon">▣</span><span>Mine våpen</span></button>
+        <button id="quickAdd"><span class="qicon">＋</span><span>Legg til</span></button>
+        <button data-filter="fav"><span class="qicon">☆</span><span>Favoritter</span></button>
+        <button id="quickProfile"><span class="qicon">◯</span><span>Profil</span></button>
+      </div>
+    </header>
+
+    <main class="main">
+      <div class="section-title"><h2>Mine våpen</h2><span id="count" class="count">0 våpen</span></div>
+      <div id="weaponList" class="list"></div>
+    </main>
+
+    <button id="officialBtn" class="official">Åpne digitalt våpenkort</button>
+    <p class="note">VåpenWallet lagrer bare din egen oversikt. Offisielt digitalt våpenkort åpnes hos Politiet.</p>
+  </section>
+
+  <section id="profileView" class="hidden">
+    <div class="main" style="padding-top:calc(24px + env(safe-area-inset-top))">
+      <div class="section-title">
+        <h2>Profil og innstillinger</h2>
+        <button id="backHome" class="secondary" style="width:auto;margin:0;padding:9px 13px">Tilbake</button>
+      </div>
+      <div class="profile-card">
+        <b>VåpenWallet</b>
+        <p class="small">Data lagres lokalt på denne telefonen.</p>
+      </div>
+      <div class="profile-actions">
+        <button id="exportBtn">Lagre sikkerhetskopi</button>
+        <button id="importBtn">Last inn sikkerhetskopi</button>
+        <button id="clearBtn" class="danger">Slett alle lokale data</button>
+      </div>
+      <input id="importFile" type="file" accept=".json" hidden>
+    </div>
+  </section>
+</div>
+
+<nav class="bottom">
+  <button class="nav active" data-nav="home"><span class="ico">⌂</span><span>Hjem</span></button>
+  <button class="nav" data-nav="all"><span class="ico">▣</span><span>Mine våpen</span></button>
+  <button class="nav plus" id="navAdd"><span class="ico">＋</span></button>
+  <button class="nav" data-nav="fav"><span class="ico">☆</span><span>Favoritter</span></button>
+  <button class="nav" data-nav="profile"><span class="ico">◯</span><span>Profil</span></button>
+</nav>
+
+<dialog id="weaponDialog">
+  <div class="modal">
+    <div class="modal-head"><h2 id="dialogTitle">Legg til våpen</h2><button class="close" data-close="weaponDialog">×</button></div>
+    <input id="editId" type="hidden">
+    <input id="photoInput" class="file-hidden" type="file" accept="image/*" capture="environment">
+    <button id="photoBtn" type="button" class="secondary">Ta bilde / velg bilde</button>
+    <div id="photoName" class="small" style="margin-top:7px">Ingen bilde valgt</div>
+    <div class="row">
+      <div class="field"><label>Produsent</label><input id="makeInput" placeholder="f.eks. Tikka"></div>
+      <div class="field"><label>Modell</label><input id="modelInput" placeholder="f.eks. T3x Lite"></div>
+    </div>
+    <div class="row">
+      <div class="field"><label>Kaliber</label><input id="caliberInput" placeholder="f.eks. .308 Win"></div>
+      <div class="field"><label>Type</label>
+        <select id="typeInput"><option>Rifle</option><option>Hagle</option><option>Pistol</option><option>Revolver</option><option>Annet</option></select>
+      </div>
+    </div>
+    <div class="field"><label>Serienummer</label><input id="serialInput"></div>
+    <div class="field"><label>Kjøpsdato</label><input id="dateInput" type="date"></div>
+    <div class="field"><label>Notater</label><textarea id="notesInput" rows="3"></textarea></div>
+    <button id="saveBtn" class="primary">Lagre</button>
+    <button id="deleteBtn" class="secondary danger hidden">Slett våpen</button>
+  </div>
+</dialog>
+
+<script>
+const STORAGE='vapenwallet-weapons-v1';
+let weapons=JSON.parse(localStorage.getItem(STORAGE)||'[]');
+let currentFilter='all', photoData='';
+
+const $=id=>document.getElementById(id);
+function save(){localStorage.setItem(STORAGE,JSON.stringify(weapons))}
+function esc(s){return String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))}
+
+function filtered(){
+  const q=$('searchInput').value.trim().toLowerCase();
+  return weapons.filter(w=>{
+    if(currentFilter==='fav'&&!w.favorite)return false;
+    if(!q)return true;
+    return [w.make,w.model,w.caliber,w.type,w.serial,w.notes].some(v=>String(v||'').toLowerCase().includes(q));
+  });
+}
+
+function render(){
+  const arr=filtered();
+  $('count').textContent=`${arr.length} ${arr.length===1?'våpen':'våpen'}`;
+  $('weaponList').innerHTML=arr.length?arr.map(w=>`
+    <article class="weapon">
+      <div class="weapon-top">
+        <div class="weapon-img">
+          ${w.photo?`<img src="${w.photo}" alt="">`:'🔐'}
+          <button class="star ${w.favorite?'on':''}" data-fav="${w.id}" aria-label="Favoritt">${w.favorite?'★':'☆'}</button>
+        </div>
+        <div class="weapon-info">
+          <h3>${esc([w.make,w.model].filter(Boolean).join(' ')||'Uten navn')}</h3>
+          <div class="meta">
+            ${w.caliber?`Kaliber: ${esc(w.caliber)}<br>`:''}
+            ${w.type?`Type: ${esc(w.type)}<br>`:''}
+            ${w.serial?`Serienr.: ${esc(w.serial)}<br>`:''}
+            ${w.date?`Kjøpsdato: ${esc(w.date)}`:''}
+          </div>
+        </div>
+      </div>
+      <div class="weapon-actions">
+        <button data-edit="${w.id}">Rediger</button>
+        <button data-official>Digitalt våpenkort</button>
+      </div>
+    </article>`).join(''):'<div class="empty">Ingen våpen lagt til ennå.</div>';
+
+  document.querySelectorAll('[data-fav]').forEach(b=>b.onclick=()=>{
+    const w=weapons.find(x=>x.id===b.dataset.fav);if(w){w.favorite=!w.favorite;save();render()}
+  });
+  document.querySelectorAll('[data-edit]').forEach(b=>b.onclick=()=>openEdit(b.dataset.edit));
+  document.querySelectorAll('[data-official]').forEach(b=>b.onclick=openOfficial);
+}
+
+function setFilter(f){currentFilter=f;showHome();render()}
+document.querySelectorAll('[data-filter]').forEach(b=>b.onclick=()=>setFilter(b.dataset.filter));
+$('searchInput').oninput=render;
+
+function resetForm(){
+  $('editId').value='';$('dialogTitle').textContent='Legg til våpen';
+  ['makeInput','modelInput','caliberInput','serialInput','dateInput','notesInput'].forEach(id=>$(id).value='');
+  $('typeInput').value='Rifle';$('photoInput').value='';$('photoName').textContent='Ingen bilde valgt';
+  photoData='';$('deleteBtn').classList.add('hidden');
+}
+function openAdd(){resetForm();$('weaponDialog').showModal()}
+$('quickAdd').onclick=openAdd;$('navAdd').onclick=openAdd;
+
+$('photoBtn').onclick=()=>$('photoInput').click();
+$('photoInput').onchange=e=>{
+  const f=e.target.files?.[0];if(!f)return;
+  $('photoName').textContent=f.name||'Bilde valgt';
+  const rd=new FileReader();rd.onload=()=>photoData=rd.result;rd.readAsDataURL(f);
+};
+
+function openEdit(id){
+  const w=weapons.find(x=>x.id===id);if(!w)return;
+  $('editId').value=w.id;$('dialogTitle').textContent='Rediger våpen';
+  $('makeInput').value=w.make||'';$('modelInput').value=w.model||'';$('caliberInput').value=w.caliber||'';
+  $('typeInput').value=w.type||'Rifle';$('serialInput').value=w.serial||'';$('dateInput').value=w.date||'';
+  $('notesInput').value=w.notes||'';photoData=w.photo||'';
+  $('photoName').textContent=w.photo?'Bilde lagret':'Ingen bilde valgt';
+  $('deleteBtn').classList.remove('hidden');$('weaponDialog').showModal();
+}
+$('saveBtn').onclick=()=>{
+  const id=$('editId').value||crypto.randomUUID();
+  const existing=weapons.find(x=>x.id===id);
+  const item={
+    id,make:$('makeInput').value.trim(),model:$('modelInput').value.trim(),caliber:$('caliberInput').value.trim(),
+    type:$('typeInput').value,serial:$('serialInput').value.trim(),date:$('dateInput').value,
+    notes:$('notesInput').value.trim(),photo:photoData,favorite:existing?.favorite||false
+  };
+  if(existing)Object.assign(existing,item);else weapons.unshift(item);
+  save();$('weaponDialog').close();render();
+};
+$('deleteBtn').onclick=()=>{
+  const id=$('editId').value;if(!id)return;
+  if(confirm('Vil du slette dette våpenet fra VåpenWallet?')){
+    weapons=weapons.filter(x=>x.id!==id);save();$('weaponDialog').close();render();
+  }
+};
+document.querySelectorAll('[data-close]').forEach(b=>b.onclick=()=>$('weaponDialog').close());
+
+function openOfficial(){
+  window.open('https://www.politiet.no/tjenester/vapen/vapenkort/','_blank','noopener');
+}
+$('officialBtn').onclick=openOfficial;
+
+function showHome(){
+  $('homeView').classList.remove('hidden');$('profileView').classList.add('hidden');
+}
+function showProfile(){
+  $('homeView').classList.add('hidden');$('profileView').classList.remove('hidden');
+}
+$('quickProfile').onclick=showProfile;$('backHome').onclick=showHome;
+document.querySelectorAll('.nav').forEach(b=>b.onclick=()=>{
+  document.querySelectorAll('.nav').forEach(x=>x.classList.remove('active'));
+  b.classList.add('active');
+  const n=b.dataset.nav;
+  if(n==='profile')showProfile();
+  else if(n==='fav')setFilter('fav');
+  else if(n==='all'||n==='home')setFilter('all');
+});
+
+$('exportBtn').onclick=()=>{
+  const blob=new Blob([JSON.stringify(weapons,null,2)],{type:'application/json'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='vapenwallet-backup.json';a.click();URL.revokeObjectURL(a.href);
+};
+$('importBtn').onclick=()=>$('importFile').click();
+$('importFile').onchange=async e=>{
+  const f=e.target.files?.[0];if(!f)return;
+  try{
+    const d=JSON.parse(await f.text());
+    if(Array.isArray(d)){weapons=d;save();render();alert('Sikkerhetskopi lastet inn.')}
+  }catch(e){alert('Kunne ikke lese sikkerhetskopien.')}
+};
+$('clearBtn').onclick=()=>{
+  if(confirm('Slette alle lokale VåpenWallet-data på denne telefonen?')){
+    weapons=[];save();render();alert('Lokale data er slettet.');
+  }
+};
+render();
+</script>
+</body>
+</html>
